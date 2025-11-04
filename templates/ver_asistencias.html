@@ -1,23 +1,99 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-  <h3>Asistencias - {{ monitoria.materia.nombre if monitoria and monitoria.materia else 'Monitoría' }}</h3>
-  <p>Monitor: {{ monitoria.monitor.nombre if monitoria.monitor else 'Sin asignar' }}</p>
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h3 class="mb-0">📋 Formatos de Asistencia</h3>
+    </div>
+    <div class="card-body">
+      <h5>{{ monitoria.materia.nombre if monitoria and monitoria.materia else 'Monitoría' }}</h5>
+      <p class="mb-1"><strong>Monitor:</strong> 
+        {% if monitoria.monitor %}
+          {{ monitoria.monitor.nombre }} ({{ monitoria.monitor.email }})
+        {% else %}
+          <span class="text-muted">Sin asignar</span>
+        {% endif %}
+      </p>
+      <p class="mb-1"><strong>Horas completadas:</strong> {{ monitoria.horas_completadas }}/{{ monitoria.horas_requeridas }}</p>
+      <p class="mb-0"><strong>Total de registros:</strong> {{ asistencias|length }}</p>
+    </div>
+  </div>
+
   {% if asistencias and asistencias|length > 0 %}
-    <table class="table mt-3">
-      <thead><tr><th>Archivo</th><th>Fecha subida</th></tr></thead>
-      <tbody>
-      {% for a in asistencias %}
-        <tr>
-          <td><a href="{{ url_for('static', filename='uploads/' ~ a.archivo) }}" target="_blank">{{ a.archivo }}</a></td>
-          <td>{{ a.fecha_subida.strftime('%d/%m/%Y %H:%M') if a.fecha_subida else '---' }}</td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="table table-hover table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th width="5%">#</th>
+            <th width="40%">Archivo</th>
+            <th width="20%">📅 Fecha de subida</th>
+            <th width="15%">🕐 Hora</th>
+            <th width="20%">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for a in asistencias %}
+          <tr>
+            <td class="text-center">{{ loop.index }}</td>
+            <td>
+              <span class="badge bg-secondary">PDF</span>
+              {{ a.archivo }}
+            </td>
+            <td>
+              {% if a.fecha_subida %}
+                {{ a.fecha_subida.strftime('%A, %d de %B de %Y') }}
+              {% else %}
+                <span class="text-muted">No disponible</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              {% if a.fecha_subida %}
+                <strong>{{ a.fecha_subida.strftime('%H:%M') }}</strong>
+              {% else %}
+                <span class="text-muted">---</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              <a href="{{ url_for('decano.uploaded_file', filename=a.archivo) }}" 
+                 class="btn btn-sm btn-outline-primary" 
+                 target="_blank"
+                 download>
+                📥 Descargar
+              </a>
+              <a href="{{ url_for('decano.uploaded_file', filename=a.archivo) }}" 
+                 class="btn btn-sm btn-outline-secondary" 
+                 target="_blank">
+                👁️ Ver
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% else %}
-    <p>No hay asistencias registradas.</p>
+    <div class="alert alert-info" role="alert">
+      <h5 class="alert-heading">📭 No hay asistencias registradas</h5>
+      <p class="mb-0">Aún no se han subido formatos de asistencia para esta monitoría.</p>
+    </div>
   {% endif %}
-  <a class="btn btn-secondary mt-3" href="{{ request.referrer or url_for('auth.index') }}">Volver</a>
+
+  <div class="mt-4">
+    <a class="btn btn-secondary" href="{{ url_for('decano.dashboard') }}">
+      ← Volver al Dashboard
+    </a>
+  </div>
 </div>
+
+<style>
+  .table th {
+    background-color: #0093AF;
+    color: white;
+    font-weight: 600;
+  }
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+  }
+</style>
 {% endblock %}

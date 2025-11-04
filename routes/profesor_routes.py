@@ -13,10 +13,21 @@ ALLOWED_DOCS = {'pdf'}
 def dashboard():
     if current_user.role != 'profesor':
         return redirect(url_for('auth.login'))
+    
     # postulaciones pendientes para mis monitorias
     solicitudes = Postulacion.query.join(Monitoria, Postulacion.monitoria_id==Monitoria.id).filter(Monitoria.profesor_id==current_user.id, Postulacion.estado=='pendiente').all()
+    
+    # mis solicitudes pendientes de aprobación
     mis_solicitudes = Monitoria.query.filter_by(profesor_id=current_user.id, activa=False).all()
+    
+    # monitorias activas con información del monitor
     monitorias_activas = Monitoria.query.filter_by(profesor_id=current_user.id, activa=True).all()
+    for m in monitorias_activas:
+        if m.monitor_estudiante_id:
+            m.monitor = User.query.get(m.monitor_estudiante_id)
+        else:
+            m.monitor = None
+    
     return render_template('dashboard_profesor.html', solicitudes=solicitudes, mis_solicitudes=mis_solicitudes, monitorias_activas=monitorias_activas)
 
 @profesor_bp.route('/crear_solicitud', methods=['GET','POST'])
@@ -98,9 +109,23 @@ def uploaded_file(filename):
 @profesor_bp.route('/ver_asistencias/<int:monitoria_id>')
 @login_required
 def ver_asistencias_prof(monitoria_id):
+    if current_user.role != 'profesor':
+        return redirect(url_for('auth.login'))
+    
     # vista para profesor ver archivos de asistencias
-    from models.asistencia import Asistencia
     monitoria = Monitoria.query.get_or_404(monitoria_id)
+    
+    # Verificar que la monitoría pertenece al profesor
+    if monitoria.profesor_id != current_user.id:
+        flash('No tienes permiso para ver esta monitoría.')
+        return redirect(url_for('profesor.dashboard'))
+    
+    # Obtener el nombre del monitor si existe
+    if monitoria.monitor_estudiante_id:
+        monitor = User.query.get(monitoria.monitor_estudiante_id)
+        monitoria.monitor = monitor
+    else:
+        monitoria.monitor = None
+    
     asistencias = Asistencia.query.filter_by(monitoria_id=monitoria_id).order_by(Asistencia.fecha_subida.desc()).all()
     return render_template('ver_asistencias.html', monitoria=monitoria, asistencias=asistencias)
-

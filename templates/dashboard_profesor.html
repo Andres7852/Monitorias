@@ -22,5 +22,58 @@
       {% else %}<li class="list-group-item">No hay solicitudes</li>{% endfor %}
     </ul>
   </div>
+
+  <div class="tab-pane fade" id="mis">
+    <h5>Mis solicitudes de monitoría (esperando aprobación del decano)</h5>
+    <ul class="list-group">
+      {% for m in mis_solicitudes %}
+        <li class="list-group-item">
+          <strong>{{ m.materia.nombre }}</strong> - 
+          {{ m.horas_requeridas }} horas - 
+          <span class="badge bg-warning text-dark">Pendiente de aprobación</span>
+          {% if m.doc_filename %}
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('profesor.uploaded_file', filename=m.doc_filename) }}" target="_blank">Ver documento</a>
+          {% endif %}
+        </li>
+      {% else %}<li class="list-group-item">No tienes solicitudes pendientes</li>{% endfor %}
+    </ul>
+  </div>
+
+  <div class="tab-pane fade" id="monitoreo">
+    <h5>Monitorías activas (aprobadas)</h5>
+    <ul class="list-group">
+      {% for m in monitorias_activas %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <strong>{{ m.materia.nombre }}</strong>
+              <br>
+              <small>
+                Monitor: 
+                {% if m.monitor %}
+                  <strong>{{ m.monitor.nombre }}</strong>
+                {% else %}
+                  <span class="text-muted">Sin monitor asignado</span>
+                {% endif %}
+              </small>
+              <br>
+              <small>Horas: {{ m.horas_completadas or 0 }}/{{ m.horas_requeridas }}</small>
+              <br>
+              <div class="progress mt-2" style="height: 20px;">
+                {% set porcentaje = ((m.horas_completadas or 0) / m.horas_requeridas * 100) | int %}
+                <div class="progress-bar" role="progressbar" style="width: {{ porcentaje }}%" aria-valuenow="{{ porcentaje }}" aria-valuemin="0" aria-valuemax="100">{{ porcentaje }}%</div>
+              </div>
+            </div>
+            <div>
+              {% if m.doc_filename %}
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('profesor.uploaded_file', filename=m.doc_filename) }}" target="_blank">Ver doc</a>
+              {% endif %}
+              <a class="btn btn-sm btn-outline-primary" href="{{ url_for('profesor.ver_asistencias_prof', monitoria_id=m.id) }}">Ver asistencias</a>
+            </div>
+          </div>
+        </li>
+      {% else %}<li class="list-group-item">No tienes monitorías activas</li>{% endfor %}
+    </ul>
+  </div>
+</div>
 {% endblock %}
-# ... truncated for brevity in code write (templates continue)

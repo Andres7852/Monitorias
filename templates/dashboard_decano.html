@@ -7,24 +7,80 @@
 </ul>
 <div class="tab-content mt-3">
   <div class="tab-pane fade show active" id="pendientes">
+    <h5 class="mb-3">Solicitudes de monitoría pendientes de aprobación</h5>
     <ul class="list-group">
       {% for s in pendientes %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          {{ s.materia.nombre }} - Profesor: {{ s.profesor_id }}
-          <div>
-            <form class="d-inline" method="post" action="{{ url_for('decano.decidir', id=s.id, accion='aceptar') }}"><button class="btn btn-sm btn-success">Aceptar</button></form>
-            <form class="d-inline" method="post" action="{{ url_for('decano.decidir', id=s.id, accion='rechazar') }}"><button class="btn btn-sm btn-danger">Rechazar</button></form>
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1"><strong>{{ s.materia.nombre }}</strong></h6>
+              <small class="text-muted">
+                Profesor: <strong>{{ s.profesor.nombre }}</strong> ({{ s.profesor.email }})
+              </small>
+              <br>
+              <small class="text-muted">Horas requeridas: {{ s.horas_requeridas }}</small>
+              {% if s.doc_filename %}
+                <br>
+                <a class="btn btn-sm btn-outline-info mt-2" href="{{ url_for('decano.uploaded_file', filename=s.doc_filename) }}" target="_blank">📄 Ver documento adjunto</a>
+              {% endif %}
+            </div>
+            <div>
+              <form class="d-inline" method="post" action="{{ url_for('decano.decidir', id=s.id, accion='aceptar') }}">
+                <button class="btn btn-sm btn-success">✓ Aceptar</button>
+              </form>
+              <form class="d-inline" method="post" action="{{ url_for('decano.decidir', id=s.id, accion='rechazar') }}">
+                <button class="btn btn-sm btn-danger">✗ Rechazar</button>
+              </form>
+            </div>
           </div>
         </li>
-      {% else %}<li class="list-group-item">Sin solicitudes</li>{% endfor %}
+      {% else %}
+        <li class="list-group-item text-center text-muted">
+          <p class="mb-0">✓ No hay solicitudes pendientes</p>
+        </li>
+      {% endfor %}
     </ul>
   </div>
   <div class="tab-pane fade" id="monitoreo">
-    <h5>Monitorías activas</h5>
+    <h5 class="mb-3">Monitorías activas</h5>
     <ul class="list-group">
       {% for m in monitorias_activas %}
-        <li class="list-group-item">{{ m.materia.nombre }} - Horas: {{ m.horas_completadas }}/{{ m.horas_requeridas }} - <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('decano.uploaded_file', filename=m.doc_filename) }}">Ver doc</a> - <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('profesor.monitoria_asistencias', id=m.id) }}">Asistencias</a></li>
-      {% else %}<li class="list-group-item">No hay monitorías activas</li>{% endfor %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="flex-grow-1">
+              <h6 class="mb-1"><strong>{{ m.materia.nombre }}</strong></h6>
+              <small class="text-muted">
+                Profesor: <strong>{{ m.profesor.nombre }}</strong>
+              </small>
+              <br>
+              <small class="text-muted">
+                Monitor: 
+                {% if m.monitor_estudiante_id %}
+                  <strong>{{ m.monitor.nombre }}</strong>
+                {% else %}
+                  <span class="text-warning">Sin monitor asignado</span>
+                {% endif %}
+              </small>
+              <br>
+              <small>Horas completadas: <strong>{{ m.horas_completadas or 0 }}/{{ m.horas_requeridas }}</strong></small>
+              <div class="progress mt-2" style="height: 20px; max-width: 300px;">
+                {% set porcentaje = ((m.horas_completadas or 0) / m.horas_requeridas * 100) | int %}
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{ porcentaje }}%" aria-valuenow="{{ porcentaje }}" aria-valuemin="0" aria-valuemax="100">{{ porcentaje }}%</div>
+              </div>
+            </div>
+            <div class="text-end">
+              {% if m.doc_filename %}
+                <a class="btn btn-sm btn-outline-secondary mb-1" href="{{ url_for('decano.uploaded_file', filename=m.doc_filename) }}" target="_blank">📄 Ver doc</a>
+              {% endif %}
+              <a class="btn btn-sm btn-outline-primary d-block" href="{{ url_for('decano.ver_asistencias_dec', monitoria_id=m.id) }}">📋 Ver asistencias</a>
+            </div>
+          </div>
+        </li>
+      {% else %}
+        <li class="list-group-item text-center text-muted">
+          <p class="mb-0">No hay monitorías activas</p>
+        </li>
+      {% endfor %}
     </ul>
   </div>
 </div>

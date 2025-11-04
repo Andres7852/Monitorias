@@ -2,43 +2,111 @@
 {% block content %}
 <h3>Panel Estudiante</h3>
 <ul class="nav nav-tabs">
-  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#activas">Monitorías activas</a></li>
-  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#postulaciones">Postulaciones</a></li>
+  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#activas">Monitorías disponibles</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#postulaciones">Mis postulaciones</a></li>
   <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#mis">Mis monitorías</a></li>
 </ul>
 <div class="tab-content mt-3">
   <div class="tab-pane fade show active" id="activas">
-    <h5>Monitorías disponibles</h5>
+    <h5>Monitorías disponibles para postular</h5>
+    
+    {% if es_monitor %}
+      <div class="alert alert-info">
+        <strong>ℹ️ Información:</strong> Ya eres monitor de una monitoría, por lo que no puedes postularte a otras en este momento.
+      </div>
+    {% elif postulaciones|length > 0 and monitorias_activas|length == 0 %}
+      <div class="alert alert-info">
+        <strong>ℹ️ Información:</strong> Ya te has postulado a todas las monitorías disponibles. Revisa el estado de tus postulaciones en la pestaña "Mis postulaciones".
+      </div>
+    {% endif %}
+    
     <ul class="list-group">
       {% for m in monitorias_activas %}
         <li class="list-group-item d-flex justify-content-between align-items-center">
-          {{ m.materia.nombre }} 
+          <div>
+            <strong>{{ m.materia.nombre }}</strong>
+            <br>
+            <small class="text-muted">Horas requeridas: {{ m.horas_requeridas }}</small>
+          </div>
           <a class="btn btn-sm btn-primary" href="{{ url_for('estudiante.postular', monitoria_id=m.id) }}">Postular</a>
         </li>
-      {% else %}<li class="list-group-item">No hay monitorías activas</li>{% endfor %}
+      {% else %}
+        <li class="list-group-item text-center text-muted">
+          {% if es_monitor %}
+            Ya eres monitor de una monitoría
+          {% else %}
+            No hay monitorías disponibles o ya te has postulado a todas las monitorías activas
+          {% endif %}
+        </li>
+      {% endfor %}
     </ul>
   </div>
+  
   <div class="tab-pane fade" id="postulaciones">
     <h5>Mis postulaciones</h5>
     <ul class="list-group">
       {% for p in postulaciones %}
-        <li class="list-group-item">{{ p.monitoria.materia.nombre }} - Estado: {{ p.estado }}</li>
-      {% else %}<li class="list-group-item">Aún no has postulado</li>{% endfor %}
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <strong>{{ p.monitoria.materia.nombre }}</strong>
+              <br>
+              <small class="text-muted">
+                Estado: 
+                {% if p.estado == 'pendiente' %}
+                  <span class="badge bg-warning text-dark">⏳ Pendiente</span>
+                {% elif p.estado == 'aceptado' %}
+                  <span class="badge bg-success">✓ Aceptado</span>
+                {% elif p.estado == 'rechazado' %}
+                  <span class="badge bg-danger">✗ Rechazado</span>
+                {% endif %}
+              </small>
+            </div>
+          </div>
+        </li>
+      {% else %}
+        <li class="list-group-item text-center text-muted">Aún no has postulado a ninguna monitoría</li>
+      {% endfor %}
     </ul>
   </div>
+  
   <div class="tab-pane fade" id="mis">
-    <h5>Mis monitorías</h5>
+    <h5>Mis monitorías asignadas</h5>
     {% for mm in mis_monitorias %}
-      <div class="card mb-2 p-2">
-        <strong>{{ mm.materia.nombre }}</strong>
-        <div>Horas: {{ mm.horas_completadas }} / {{ mm.horas_requeridas }}</div>
-        <form method="post" action="{{ url_for('estudiante.upload_asistencia', monitoria_id=mm.id) }}" enctype="multipart/form-data">
-          <label>Subir lista de asistencias (PDF/CSV)</label>
-          <input class="form-control" type="file" name="asistencia" required>
-          <button class="btn btn-sm btn-secondary mt-2">Subir</button>
-        </form>
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">{{ mm.materia.nombre }}</h5>
+          <div class="mb-3">
+            <small class="text-muted">Progreso de horas:</small>
+            <div class="d-flex align-items-center gap-2">
+              <div class="progress flex-grow-1" style="height: 25px;">
+                {% set porcentaje = ((mm.horas_completadas or 0) / mm.horas_requeridas * 100) | int %}
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{ porcentaje }}%" aria-valuenow="{{ porcentaje }}" aria-valuemin="0" aria-valuemax="100">
+                  {{ porcentaje }}%
+                </div>
+              </div>
+              <strong>{{ mm.horas_completadas or 0 }} / {{ mm.horas_requeridas }}</strong>
+            </div>
+          </div>
+          
+          <div class="alert alert-info mb-3">
+            <small><strong>💡 Nota:</strong> Cada formato de asistencia que subas sumará <strong>2 horas</strong> a tu progreso.</small>
+          </div>
+          
+          <form method="post" action="{{ url_for('estudiante.upload_asistencia', monitoria_id=mm.id) }}" enctype="multipart/form-data">
+            <div class="mb-2">
+              <label class="form-label"><strong>Subir lista de asistencias</strong> (PDF/CSV/Excel)</label>
+              <input class="form-control" type="file" name="asistencia" accept=".pdf,.csv,.xlsx,.xls" required>
+            </div>
+            <button class="btn btn-primary">📤 Subir asistencia (+2 horas)</button>
+          </form>
+        </div>
       </div>
-    {% else %}<p>No tienes monitorías asignadas.</p>{% endfor %}
+    {% else %}
+      <div class="alert alert-warning">
+        <p class="mb-0">No tienes monitorías asignadas. Postúlate a una monitoría disponible para comenzar.</p>
+      </div>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}

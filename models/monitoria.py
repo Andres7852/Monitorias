@@ -12,4 +12,7 @@ class Monitoria(db.Model):
     activa = db.Column(db.Boolean, default=False)
     doc_filename = db.Column(db.String(250))  # pdf uploaded for request
 
+    # Relaciones
     materia = db.relationship('Materia', backref=db.backref('monitorias', lazy=True))
+    profesor = db.relationship('User', foreign_keys=[profesor_id], backref=db.backref('monitorias_profesor', lazy=True))
+    monitor = db.relationship('User', foreign_keys=[monitor_estudiante_id], backref=db.backref('monitorias_monitor', lazy=True))
