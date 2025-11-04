@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+instance/
+uploads/
+*.pyc
+*.sqlite3
+*.db
+*.zip
+.vscode/

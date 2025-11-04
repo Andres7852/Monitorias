@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>Crear solicitud</h4>
+<p>Descargar formato: <a href="{{ url_for('static', filename='solicitud_template.docx') }}" download>Plantilla solicitud (.docx)</a></p>
+<form method="post" enctype="multipart/form-data">
+  <div class="mb-3">
+    <label>Materia</label>
+    <select class="form-select" name="materia_id" required>
+      {% for m in materias %}<option value='{{ m.id }}'>{{ m.nombre }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="mb-3">
+    <label>Horas</label>
+    <select class="form-select" name="horas" required>
+      <option>20</option><option>30</option><option>40</option>
+    </select>
+  </div>
+  <div class="mb-3">
+    <label>Subir solicitud final (PDF opcional)</label>
+    <input class="form-control" type="file" name="doc" accept=".pdf">
+  </div>
+  <button class="btn btn-primary">Crear solicitud</button>
+</form>
+{% endblock %}

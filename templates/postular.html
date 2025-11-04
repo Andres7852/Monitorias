@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>Postular a {{ monitoria.materia.nombre }}</h4>
+<form method="post" enctype="multipart/form-data">
+  <div class="mb-3">
+    <label>CV (PDF)</label>
+    <input class="form-control" type="file" name="cv" accept=".pdf" required>
+  </div>
+  <div class="mb-3">
+    <label>Cédula (PDF o PNG)</label>
+    <input class="form-control" type="file" name="cedula" accept=".pdf,.png" required>
+  </div>
+  <div class="mb-3">
+    <label>Foto tipo documento (PNG/JPG)</label>
+    <input class="form-control" type="file" name="photo" accept=".png,.jpg,.jpeg" required>
+  </div>
+  <button class="btn btn-primary">Enviar postulación</button>
+</form>
+{% endblock %}

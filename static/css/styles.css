@@ -1,0 +1,14 @@
+
+:root{
+  --bondi-blue: #0093AF;
+  --san-marino: #456990;
+  --een: #264653;
+  --sinbad: #9FD3C7;
+  --janna: #F5E6CC;
+  --text: #222;
+}
+body { background: var(--janna); color:var(--text); padding-top:70px; }
+.navbar { background: var(--bondi-blue) !important; }
+.btn-primary { background: var(--bondi-blue); border-color: var(--bondi-blue); }
+.card { background: white; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.03); }
+a { color: var(--san-marino); }

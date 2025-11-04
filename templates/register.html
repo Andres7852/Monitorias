@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-center">
+  <div class="card p-4" style="width:520px;">
+    <h4 class="text-center">Crear cuenta</h4>
+    <form method="post" action="{{ url_for('auth.register') }}">
+      <div class="mb-3">
+        <label class="form-label">Nombre completo</label>
+        <input class="form-control" name="nombre" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Correo</label>
+        <input class="form-control" name="email" type="email" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Contraseña</label>
+        <input class="form-control" name="password" type="password" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Rol</label>
+        <select class="form-select" id="role" name="role" onchange="toggleStudentFields()">
+          <option value="estudiante">Estudiante</option>
+          <option value="profesor">Profesor</option>
+          <option value="decano">Decano</option>
+        </select>
+      </div>
+      <div id="student_fields">
+        <div class="mb-3">
+          <label class="form-label">Semestre</label>
+          <select class="form-select" name="semestre">
+            {% for s in range(1,11) %}<option value="{{ s }}">{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Carrera</label>
+          <select class="form-select" name="carrera">
+            {% for c in carreras %}<option>{{ c }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div id="code_field" style="display:none;">
+        <div class="mb-3">
+          <label class="form-label">Código (solo profesores/decano)</label>
+          <input class="form-control" name="access_code" placeholder="Código alfanumérico">
+        </div>
+      </div>
+      <button class="btn btn-success w-100" type="submit">Crear cuenta</button>
+    </form>
+  </div>
+</div>
+<script>
+function toggleStudentFields(){
+  const role = document.getElementById('role').value;
+  document.getElementById('student_fields').style.display = role === 'estudiante' ? 'block' : 'none';
+  document.getElementById('code_field').style.display = (role === 'profesor' || role === 'decano') ? 'block' : 'none';
+}
+window.onload = toggleStudentFields;
+</script>
+{% endblock %}

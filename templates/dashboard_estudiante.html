@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Panel Estudiante</h3>
+<ul class="nav nav-tabs">
+  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#activas">Monitorías activas</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#postulaciones">Postulaciones</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#mis">Mis monitorías</a></li>
+</ul>
+<div class="tab-content mt-3">
+  <div class="tab-pane fade show active" id="activas">
+    <h5>Monitorías disponibles</h5>
+    <ul class="list-group">
+      {% for m in monitorias_activas %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ m.materia.nombre }} 
+          <a class="btn btn-sm btn-primary" href="{{ url_for('estudiante.postular', monitoria_id=m.id) }}">Postular</a>
+        </li>
+      {% else %}<li class="list-group-item">No hay monitorías activas</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="tab-pane fade" id="postulaciones">
+    <h5>Mis postulaciones</h5>
+    <ul class="list-group">
+      {% for p in postulaciones %}
+        <li class="list-group-item">{{ p.monitoria.materia.nombre }} - Estado: {{ p.estado }}</li>
+      {% else %}<li class="list-group-item">Aún no has postulado</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="tab-pane fade" id="mis">
+    <h5>Mis monitorías</h5>
+    {% for mm in mis_monitorias %}
+      <div class="card mb-2 p-2">
+        <strong>{{ mm.materia.nombre }}</strong>
+        <div>Horas: {{ mm.horas_completadas }} / {{ mm.horas_requeridas }}</div>
+        <form method="post" action="{{ url_for('estudiante.upload_asistencia', monitoria_id=mm.id) }}" enctype="multipart/form-data">
+          <label>Subir lista de asistencias (PDF/CSV)</label>
+          <input class="form-control" type="file" name="asistencia" required>
+          <button class="btn btn-sm btn-secondary mt-2">Subir</button>
+        </form>
+      </div>
+    {% else %}<p>No tienes monitorías asignadas.</p>{% endfor %}
+  </div>
+</div>
+{% endblock %}

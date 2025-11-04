@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>Asistencias - {{ monitoria.materia.nombre }}</h4>
+{% for fecha, items in grouped.items() %}
+  <div class="card mb-2 p-2">
+    <strong>Fecha: {{ fecha }}</strong>
+    <ul>
+      {% for a in items %}
+        <li>{{ a.archivo }} {% if a.notas %}- {{ a.notas }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% else %}<p>No hay listas subidas.</p>{% endfor %}
+{% endblock %}

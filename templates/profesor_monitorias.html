@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>Monitorías (detalle)</h4>
+<ul class="list-group">
+  {% for m in monitorias %}
+    <li class="list-group-item">
+      {{ m.materia.nombre }} - Horas: {{ m.horas_completadas }}/{{ m.horas_requeridas }}
+      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('profesor.monitoria_asistencias', id=m.id) }}">Asistencias</a>
+    </li>
+  {% else %}<li class="list-group-item">No hay monitorías</li>{% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Panel Decano</h3>
+<ul class="nav nav-tabs">
+  <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#pendientes">Solicitudes pendientes</a></li>
+  <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#monitoreo">Monitoreo</a></li>
+</ul>
+<div class="tab-content mt-3">
+  <div class="tab-pane fade show active" id="pendientes">
+    <ul class="list-group">
+      {% for s in pendientes %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ s.materia.nombre }} - Profesor: {{ s.profesor_id }}
+          <div>
+            <form class="d-inline" method="post" action="{{ url_for('decano.decidir', id=s.id, accion='aceptar') }}"><button class="btn btn-sm btn-success">Aceptar</button></form>
+            <form class="d-inline" method="post" action="{{ url_for('decano.decidir', id=s.id, accion='rechazar') }}"><button class="btn btn-sm btn-danger">Rechazar</button></form>
+          </div>
+        </li>
+      {% else %}<li class="list-group-item">Sin solicitudes</li>{% endfor %}
+    </ul>
+  </div>
+  <div class="tab-pane fade" id="monitoreo">
+    <h5>Monitorías activas</h5>
+    <ul class="list-group">
+      {% for m in monitorias_activas %}
+        <li class="list-group-item">{{ m.materia.nombre }} - Horas: {{ m.horas_completadas }}/{{ m.horas_requeridas }} - <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('decano.uploaded_file', filename=m.doc_filename) }}">Ver doc</a> - <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('profesor.monitoria_asistencias', id=m.id) }}">Asistencias</a></li>
+      {% else %}<li class="list-group-item">No hay monitorías activas</li>{% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}
